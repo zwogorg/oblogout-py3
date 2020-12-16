@@ -212,6 +212,12 @@ class OpenboxLogout():
             if self.parser.has_option("settings", "monitor"):
                self.monitor = self.parser.getint("settings", "monitor")
 
+            if self.parser.has_option("settings", "handleLockBeforeSuspend"):
+               self.handleLockBeforeSuspend = self.parser.getboolean("settings", "handleLockBeforeSuspend")
+            else:
+                self.handleLockBeforeSuspend = True
+            self.logger.debug("Handle screen lock before suspend/hibernate set to: %s" % self.handleLockBeforeSuspend)
+
         if self.backend == "HAL" or self.backend == "ConsoleKit":
             from .dbushandler import DbusController
             self.dbus = DbusController(self.backend)
@@ -394,7 +400,8 @@ class OpenboxLogout():
 
         elif (data == 'suspend'):
             self.window.hide()
-            self.__exec_cmd(self.cmd_lock)
+            if self.handleLockBeforeSuspend:
+                self.__exec_cmd(self.cmd_lock)
             if self.backend:
                 self.dbus.suspend()
 
@@ -403,7 +410,8 @@ class OpenboxLogout():
 
         elif (data == 'hibernate'):
             self.window.hide()
-            self.__exec_cmd(self.cmd_lock)
+            if self.handleLockBeforeSuspend:
+                self.__exec_cmd(self.cmd_lock)
             if self.backend:
                 self.dbus.hibernate()
             else:
